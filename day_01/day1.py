@@ -1,9 +1,3 @@
-filename = "day_01/input.txt"
-
-with open(filename) as file:
-    lines = file.readlines()
-
-
 def part1(lines):
     prev = int(lines[0])
     increases = 0
@@ -30,5 +24,28 @@ def part2(lines):
     print("Day 1 part 2:", increases)
 
 
-part1(lines)
-part2(lines)
+sample = "day_01/sample.txt"
+input_lalisita = "day_01/input-lalisita.txt"
+input_yogan = "day_01/input-yogan.txt"
+
+with open(sample) as file:
+    lines = file.readlines()
+    print("Sample")
+    part1(lines)
+    part2(lines)
+
+print()
+
+with open(input_lalisita) as file:
+    lines = file.readlines()
+    print("LaLisita")
+    part1(lines)
+    part2(lines)
+
+print()
+
+with open(input_yogan) as file:
+    lines = file.readlines()
+    print("yogan")
+    part1(lines)
+    part2(lines)
