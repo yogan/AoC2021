@@ -50,13 +50,13 @@ with open(sample) as file:
 
 print()
 
-# with open(input_lalisita) as file:
-#     lines = file.readlines()
-#     print("LaLisita")
-#     part1(lines)
-#     part2(lines)
+with open(input_lalisita) as file:
+    lines = file.readlines()
+    print("LaLisita")
+    part1(lines)
+    part2(lines)
 
-# print()
+print()
 
 with open(input_yogan) as file:
     lines = file.readlines()
