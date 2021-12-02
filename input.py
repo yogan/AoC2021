@@ -5,32 +5,22 @@ def read_and_solve(filename, solve_part_1, solve_part_2):
     input_lalisita = f"inputs/{day}/lalisita.txt"
     input_yogan    = f"inputs/{day}/yogan.txt"
 
+    def process(input, name):
+        with open(input) as file:
+            lines = file.readlines()
+            print(name)
+            print('-' * len(name))
+            print("Part 1:", solve_part_1(lines))
+            print("Part 2:", solve_part_2(lines))
+
     print("========")
     print(f" DAY {day}")
     print("========")
     print()
 
-    with open(input_sample) as file:
-        lines = file.readlines()
-        print("Sample")
-        print("------")
-        print("Part 1:", solve_part_1(lines))
-        print("Part 2:", solve_part_2(lines))
-
+    process(input_sample,   "Sample")
     print()
-
-    with open(input_lalisita) as file:
-        lines = file.readlines()
-        print("LaLisita")
-        print("--------")
-        print("Part 1:", solve_part_1(lines))
-        print("Part 2:", solve_part_2(lines))
-
+    process(input_lalisita, "LaLisita")
     print()
+    process(input_yogan,    "yogan")
 
-    with open(input_yogan) as file:
-        lines = file.readlines()
-        print("yogan")
-        print("-----")
-        print("Part 1:", solve_part_1(lines))
-        print("Part 2:", solve_part_2(lines))
