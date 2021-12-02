@@ -1,3 +1,6 @@
+from input import read_and_solve
+
+
 def part1(lines):
     distance = 0
     depth = 0
@@ -13,8 +16,7 @@ def part1(lines):
         elif command == "down":
             depth += number
 
-    result = distance * depth
-    print("Day 2 part 1:", result)
+    return distance * depth
 
 
 def part2(lines):
@@ -34,32 +36,7 @@ def part2(lines):
         elif command == "down":
             aim += number
 
-    result = distance * depth
-    print("Day 2 part 2:", result)
+    return distance * depth
 
 
-sample = "day_02/sample.txt"
-input_lalisita = "day_02/input-lalisita.txt"
-input_yogan = "day_02/input-yogan.txt"
-
-with open(sample) as file:
-    lines = file.readlines()
-    print("Sample")
-    part1(lines)
-    part2(lines)
-
-print()
-
-with open(input_lalisita) as file:
-    lines = file.readlines()
-    print("LaLisita")
-    part1(lines)
-    part2(lines)
-
-print()
-
-with open(input_yogan) as file:
-    lines = file.readlines()
-    print("yogan")
-    part1(lines)
-    part2(lines)
+read_and_solve(__file__, part1, part2)

@@ -1,1 +1,1 @@
-python day_%1/day%1.py
+python day%1.py
