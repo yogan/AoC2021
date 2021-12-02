@@ -18,7 +18,23 @@ def part1(lines):
 
 
 def part2(lines):
-    result = 0
+    distance = 0
+    depth = 0
+    aim = 0
+
+    for line in lines:
+        [command, num_str] = line.split(" ")
+        number = int(num_str)
+
+        if command == "forward":
+            distance += number
+            depth += aim * number
+        elif command == "up":
+            aim -= number
+        elif command == "down":
+            aim += number
+
+    result = distance * depth
     print("Day 2 part 2:", result)
 
 
