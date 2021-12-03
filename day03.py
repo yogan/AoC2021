@@ -1,23 +1,27 @@
 from input import read_and_solve
 
 
-def part1(lines):
-    digits = len(lines[0])-1
-    most_common_bits = [0] * digits
+def calc_most_common_bit(numbers, index):
+    most_common_bit = 0
 
-    for line in lines:
-        line_bits = list(line)
-        for i in range(digits):
-            bit = line_bits[i]
-            if bit == '0':
-                most_common_bits[i] -= 1
-            else:
-                most_common_bits[i] += 1
+    for number in numbers:
+        line_bits = list(number)
+        bit = line_bits[index]
+        if bit == '0':
+            most_common_bit -= 1
+        else:
+            most_common_bit += 1
+
+    return most_common_bit
+
+def part1(lines):
+    digits = len(lines[0]) - 1
 
     gamma_bits = [0] * digits
     epsilon_bits = [0] * digits
+
     for i in range(digits):
-        if most_common_bits[i] > 0:
+        if calc_most_common_bit(lines, i) > 0:
             gamma_bits[i] = "1"
             epsilon_bits[i] = "0"
         else:
