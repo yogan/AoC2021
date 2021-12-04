@@ -69,7 +69,29 @@ def part1(lines):
 
 
 def part2(lines):
-    return 0
+    drawn_numbers = parse_drawn_numbers(lines[0])
+    boards = list(map(lambda b: (b, False), parse_boards(lines[1::])))
+    solved_boards = 0
+    for number in drawn_numbers:
+        remaining_boards = []
+        for i in range(len(boards)):
+            board = boards[i][0]
+            mark_matches(board, number)
+            if board_is_solved(board):
+                print(board)
+                boards[i] = (board, True)
+                solved_boards += 1                
+                if solved_boards == len(boards)-1:
+                    last_unsolved_board = list(filter(lambda b: b[1] == False, boards))
+                    #print(last_unsolved_board)
+                    assert len(last_unsolved_board) == 1
+                    sum = sum_unmarked(last_unsolved_board[0])
+                    return sum * number
+                else:
+                    remaining_boards.append(board)
+        boards = remaining_boards
+    raise Exception("No board solved.")
+
 
 
 def test_sum_unmarked():
