@@ -71,22 +71,21 @@ def part1(lines):
 
 def part2(lines):
     drawn_numbers = parse_drawn_numbers(lines[0])
-    boards = list(map(lambda b: (b, False), parse_boards(lines[1::])))
+    boards = parse_boards(lines[1::])
 
     for number in drawn_numbers:
         remaining_boards = []
 
         for i in range(len(boards)):
-            board = boards[i][0]
+            board = boards[i]
             mark_matches(board, number)
 
             if board_is_solved(board):
-                boards[i] = (board, True)
                 if len(boards) == 1:
                     sum = sum_unmarked(board)
                     return sum * number
             else:
-                remaining_boards.append((board, False))
+                remaining_boards.append(board)
 
         boards = remaining_boards
 
