@@ -6,12 +6,15 @@ def read_and_solve(filename, solve_part_1, solve_part_2):
     input_yogan    = f"inputs/{day}/yogan.txt"
 
     def process(input, name):
-        with open(input) as file:
-            lines = file.readlines()
-            print(name)
-            print('-' * len(name))
-            print("Part 1:", solve_part_1(lines))
-            print("Part 2:", solve_part_2(lines))
+        try:
+            with open(input) as file:
+                lines = file.readlines()
+                print(name)
+                print('-' * len(name))
+                print("Part 1:", solve_part_1(lines))
+                print("Part 2:", solve_part_2(lines))
+        except IOError:
+            print(input, "does not exist, skipping")
 
     print("========")
     print(f" DAY {day}")
