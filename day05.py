@@ -21,16 +21,12 @@ def covered_points(start, end, include_diagonals=False):
         for y in range(y_min, y_max + 1):
             points.add((x1, y))
 
-        return points
-
     elif y1 == y2:
         x_min = min(x1, x2)
         x_max = max(x1, x2)
 
         for x in range(x_min, x_max + 1):
             points.add((x, y1))
-
-        return points
 
     else:
         if include_diagonals:
@@ -45,7 +41,7 @@ def covered_points(start, end, include_diagonals=False):
                 x += x_delta
                 y += y_delta
 
-        return points
+    return points
 
 
 def count_points(points_with_count: Dict, points):
