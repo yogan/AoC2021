@@ -9,7 +9,7 @@ def line_to_coords(line):
             line.split(" -> ")))
 
 
-def covered_points(start, end):
+def covered_points(start, end, include_diagonals=False):
     x1, y1 = start
     x2, y2 = end
     points = set()
@@ -17,19 +17,34 @@ def covered_points(start, end):
     if x1 == x2:
         y_min = min(y1, y2)
         y_max = max(y1, y2)
+
         for y in range(y_min, y_max + 1):
             points.add((x1, y))
+
         return points
 
     elif y1 == y2:
         x_min = min(x1, x2)
         x_max = max(x1, x2)
+
         for x in range(x_min, x_max + 1):
             points.add((x, y1))
+
         return points
 
     else:
-        # for now, we only consider horizontal or vertical lines
+        if include_diagonals:
+            x = x1
+            y = y1
+
+            x_delta = 1 if x1 < x2 else -1
+            y_delta = 1 if y1 < y2 else -1
+
+            for _ in range(abs(x1 - x2) + 1):
+                points.add((x, y))
+                x += x_delta
+                y += y_delta
+
         return points
 
 
@@ -58,7 +73,15 @@ def part1(lines):
 
 
 def part2(lines):
-    return 0
+    points_with_count = {}
+
+    for line in lines:
+        start, end = line_to_coords(line)
+        points = covered_points(start, end, include_diagonals=True)
+        count_points(points_with_count, points)
+
+    dangerous_points = filter_points_with_min_count(points_with_count, 2)
+    return len(dangerous_points)
 
 
 class TestDay5(unittest.TestCase):
@@ -83,6 +106,30 @@ class TestDay5(unittest.TestCase):
         result = covered_points((3, 1), (1, 1))
         self.assertEqual(result, {(1, 1), (2, 1), (3, 1)})
 
+    def test_covered_points_diagonal_ignored_by_default(self):
+        result = covered_points((1, 1), (3, 3))
+        self.assertEqual(result, set())
+
+    def test_covered_points_diagonal_ignored_explicitly(self):
+        result = covered_points((1, 1), (3, 3), include_diagonals=False)
+        self.assertEqual(result, set())
+
+    def test_covered_points_diagonal_right_up(self):
+        result = covered_points((1, 1), (3, 3), include_diagonals=True)
+        self.assertEqual(result, {(1, 1), (2, 2), (3, 3)})
+
+    def test_covered_points_diagonal_left_down(self):
+        result = covered_points((3, 3), (1, 1), include_diagonals=True)
+        self.assertEqual(result, {(1, 1), (2, 2), (3, 3)})
+
+    def test_covered_points_diagonal_right_down(self):
+        result = covered_points((1, 3), (3, 1), include_diagonals=True)
+        self.assertEqual(result, {(1, 3), (2, 2), (3, 1)})
+
+    def test_covered_points_diagonal_left_up(self):
+        result = covered_points((3, 1), (1, 3), include_diagonals=True)
+        self.assertEqual(result, {(1, 3), (2, 2), (3, 1)})
+
     def test_count_points(self):
         points = {}
         count_points(points, {(3, 1), (1, 1), (2, 1)})
@@ -98,20 +145,24 @@ class TestDay5(unittest.TestCase):
             2)
         self.assertEqual(points, {(1, 1): 3, (3, 1): 2})
 
-    def test_part_1(self):
-        lines = [
-            "0,9 -> 5,9",
-            "8,0 -> 0,8",
-            "9,4 -> 3,4",
-            "2,2 -> 2,1",
-            "7,0 -> 7,4",
-            "6,4 -> 2,0",
-            "0,9 -> 2,9",
-            "3,4 -> 1,4",
-            "0,0 -> 8,8",
-            "5,5 -> 8,2",
-        ]
-        self.assertEqual(part1(lines), 5)
+    sample_lines = [
+        "0,9 -> 5,9",
+        "8,0 -> 0,8",
+        "9,4 -> 3,4",
+        "2,2 -> 2,1",
+        "7,0 -> 7,4",
+        "6,4 -> 2,0",
+        "0,9 -> 2,9",
+        "3,4 -> 1,4",
+        "0,0 -> 8,8",
+        "5,5 -> 8,2",
+    ]
+
+    def test_part_1_sample(self):
+        self.assertEqual(part1(self.sample_lines), 5)
+
+    def test_part_2_sample(self):
+        self.assertEqual(part2(self.sample_lines), 12)
 
 
 if __name__ == '__main__':
