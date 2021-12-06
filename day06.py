@@ -32,7 +32,8 @@ def part2(lines):
     fish_can = {}
 
     for i in range(9):
-        fish_can[i] = len(list(filter(lambda f: f == i, fishes)))
+        #fish_can[i] = len(list(filter(lambda f: f == i, fishes)))
+        fish_can[i] = len([x for x in fishes if x == i])
 
     for _ in range(days):
         next_fish_can = {}
