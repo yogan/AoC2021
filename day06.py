@@ -26,7 +26,25 @@ def part1(lines):
 
 
 def part2(lines):
-    return 0
+    days = 256
+    fishes = parse_fish(lines[0])
+
+    fish_can = {}
+
+    for i in range(9):
+        fish_can[i] = len(list(filter(lambda f: f == i, fishes)))
+
+    for _ in range(days):
+        next_fish_can = {}
+
+        for i in range(1, 9):
+            next_fish_can[i-1] = fish_can[i]
+
+        next_fish_can[6] += fish_can[0]
+        next_fish_can[8] = fish_can[0]
+        fish_can = next_fish_can
+
+    return sum(fish_can.values())
 
 
 read_and_solve(__file__, part1, part2)
