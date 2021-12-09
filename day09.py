@@ -1,5 +1,4 @@
 from input import read_and_solve
-from functools import reduce
 
 
 def parse_input(lines):
@@ -39,6 +38,11 @@ def calculate_low_points(height_map):
     return low_points
 
 
+def add_if_candidate_fits(basin, candidate, current, row, column):
+    if candidate >= current and candidate != 9:
+        basin.add((row, column))
+
+
 def calculate_basin_size(height_map, row, column):
     basin = {(row, column)}
     row_max = len(height_map)-1
@@ -50,24 +54,20 @@ def calculate_basin_size(height_map, row, column):
             current = height_map[row][column]
             if row > 0:
                 candidate = height_map[row-1][column]
-                if candidate >= current:
-                    if candidate != 9:
-                        next_basin.add((row-1, column))
+                add_if_candidate_fits(
+                    next_basin, candidate, current, row-1, column)
             if row < row_max:
                 candidate = height_map[row+1][column]
-                if candidate >= current:
-                    if candidate != 9:
-                        next_basin.add((row+1, column))
+                add_if_candidate_fits(
+                    next_basin, candidate, current, row+1, column)
             if column > 0:
                 candidate = height_map[row][column-1]
-                if candidate >= current:
-                    if candidate != 9:
-                        next_basin.add((row, column-1))
+                add_if_candidate_fits(
+                    next_basin, candidate, current, row, column-1)
             if column < column_max:
                 candidate = height_map[row][column+1]
-                if candidate >= current:
-                    if candidate != 9:
-                        next_basin.add((row, column+1))
+                add_if_candidate_fits(
+                    next_basin, candidate, current, row, column+1)
         if len(next_basin) == len(basin):
             return len(basin)
         basin = next_basin
