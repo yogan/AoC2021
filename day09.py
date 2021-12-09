@@ -39,6 +39,40 @@ def calculate_low_points(height_map):
     return low_points
 
 
+def calculate_basin_size(height_map, row, column):
+    basin = {(row, column)}
+    row_max = len(height_map)-1
+    column_max = len(height_map[0])-1
+    while True:
+        next_basin = set()
+        for row, column in basin:
+            next_basin.add((row, column))
+            current = height_map[row][column]
+            if row > 0:
+                candidate = height_map[row-1][column]
+                if candidate >= current:
+                    if candidate != 9:
+                        next_basin.add((row-1, column))
+            if row < row_max:
+                candidate = height_map[row+1][column]
+                if candidate >= current:
+                    if candidate != 9:
+                        next_basin.add((row+1, column))
+            if column > 0:
+                candidate = height_map[row][column-1]
+                if candidate >= current:
+                    if candidate != 9:
+                        next_basin.add((row, column-1))
+            if column < column_max:
+                candidate = height_map[row][column+1]
+                if candidate >= current:
+                    if candidate != 9:
+                        next_basin.add((row, column+1))
+        if len(next_basin) == len(basin):
+            return len(basin)
+        basin = next_basin
+
+
 def part1(lines):
     height_map = parse_input(lines)
     low_points = calculate_low_points(height_map)
@@ -49,7 +83,13 @@ def part1(lines):
 
 
 def part2(lines):
-    return 0
+    height_map = parse_input(lines)
+    low_points = calculate_low_points(height_map)
+    basin_sizes = []
+    for row, column in low_points:
+        basin_sizes.append(calculate_basin_size(height_map, row, column))
+    basin_sizes.sort(reverse=True)
+    return basin_sizes[0] * basin_sizes[1] * basin_sizes[2]
 
 
 read_and_solve(__file__, part1, part2)
