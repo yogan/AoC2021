@@ -1,4 +1,5 @@
 from input import read_and_solve
+from functools import reduce
 
 
 def parse_input(lines):
@@ -22,9 +23,8 @@ def get_neighbors(height_map, row, column, row_max, column_max):
     return result
 
 
-def part1(lines):
-    height_map = parse_input(lines)
-    sum_of_risk_levels = 0
+def calculate_low_points(height_map):
+    low_points = []
     row_max = len(height_map)
     column_max = len(height_map[0])
     for row in range(row_max):
@@ -34,7 +34,16 @@ def part1(lines):
                 height_map, row, column, row_max-1, column_max-1)
             larger_neighbors = [x for x in neighbors if x > risk_level]
             if len(neighbors) == len(larger_neighbors):
-                sum_of_risk_levels += risk_level + 1
+                low_points.append((row, column))
+
+    return low_points
+
+
+def part1(lines):
+    height_map = parse_input(lines)
+    low_points = calculate_low_points(height_map)
+    sum_of_risk_levels = sum(
+        [height_map[row][column]+1 for row, column in low_points])
 
     return sum_of_risk_levels
 
