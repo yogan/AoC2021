@@ -7,8 +7,8 @@ def read_and_solve(filename, solve_part_1, solve_part_2):
 
     def process(input, name):
         try:
-            with open(input) as file:
-                lines = file.readlines()
+            with open(input) as file:                
+                lines = [line.strip() for line in file.readlines()]
                 print(name)
                 print('-' * len(name))
                 print("Part 1:", solve_part_1(lines))
