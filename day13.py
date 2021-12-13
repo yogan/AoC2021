@@ -4,7 +4,7 @@ from input import read_and_solve
 
 def parse_input(lines):
     index = lines.index("")
-    (dot_lines, fold_lines) = (lines[:index], lines[index+1:])
+    dot_lines, fold_lines = (lines[:index], lines[index+1:])
 
     dot_pairs = [s.split(",") for s in dot_lines]
     dots = {(int(x), int(y)) for x, y in dot_pairs}
@@ -50,16 +50,16 @@ def dots_to_ascii_art(dots):
 
 
 def part1(lines):
-    (dots, folds) = parse_input(lines)
-    (axis, coord) = folds[0]
+    dots, folds = parse_input(lines)
+    axis, coord = folds[0]
     new_dots = fold_left(dots, coord) if axis == "x" else fold_up(dots, coord)
     return len(new_dots)
 
 
 def part2(lines):
-    (dots, folds) = parse_input(lines)
+    dots, folds = parse_input(lines)
 
-    for (axis, coord) in folds:
+    for axis, coord in folds:
         dots = fold_left(dots, coord) if axis == "x" else fold_up(dots, coord)
 
     print()
