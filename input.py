@@ -21,9 +21,8 @@ def read_and_solve(filename, solve_part_1, solve_part_2):
     print("========")
     print()
 
-    # process(input_sample,   "Sample")
-    # print()
-    # process(input_lalisita, "LaLisita")
-    # print()
-    # process(input_yogan,    "yogan")
-
+    process(input_sample,   "Sample")
+    print()
+    process(input_lalisita, "LaLisita")
+    print()
+    process(input_yogan,    "yogan")
