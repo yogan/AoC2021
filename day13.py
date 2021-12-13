@@ -16,9 +16,9 @@ def parse_input(lines):
 
 
 def fold_left(dots, fold_x):
-    new_dots = {(x, y) for x, y in dots if x < fold_x}
-    dots_to_fold = {(x, y) for x, y in dots if x > fold_x}
-    assert not {None for x, _ in dots if x == fold_x}, "no dots on fold line"
+    new_dots     = {(x, y) for x, y in dots if x <  fold_x}
+    dots_to_fold = {(x, y) for x, y in dots if x >  fold_x}
+    assert     not {(x, y) for x, y in dots if x == fold_x}, "no dots on fold"
 
     for x, y in dots_to_fold:
         new_dots.add((abs(x - 2 * fold_x), y))
@@ -27,14 +27,26 @@ def fold_left(dots, fold_x):
 
 
 def fold_up(dots, fold_y):
-    new_dots = {(x, y) for x, y in dots if y < fold_y}
-    dots_to_fold = {(x, y) for x, y in dots if y > fold_y}
-    assert not {None for _, y in dots if y == fold_y}, "no dots on fold line"
+    new_dots     = {(x, y) for x, y in dots if y <  fold_y}
+    dots_to_fold = {(x, y) for x, y in dots if y >  fold_y}
+    assert     not {(x, y) for x, y in dots if y == fold_y}, "no dots on fold"
 
     for x, y in dots_to_fold:
         new_dots.add((x, abs(y - 2 * fold_y)))
 
     return new_dots
+
+
+def dots_to_ascii_art(dots):
+    width  = max([x for x, _ in dots]) + 1
+    height = max([y for _, y in dots]) + 1
+
+    lines = [["."] * width for _ in range(height)]
+
+    for x, y in dots:
+        lines[y][x] = "#"
+
+    return ["".join(line) for line in lines]
 
 
 def part1(lines):
@@ -45,7 +57,17 @@ def part1(lines):
 
 
 def part2(lines):
-    return 0
+    (dots, folds) = parse_input(lines)
+
+    for (axis, coord) in folds:
+        dots = fold_left(dots, coord) if axis == "x" else fold_up(dots, coord)
+
+    print()
+    for line in dots_to_ascii_art(dots):
+        print(line)
+    print()
+
+    return "↑ Read this, puny human! ↑"
 
 
 class TestDay13(unittest.TestCase):
@@ -148,11 +170,30 @@ class TestDay13(unittest.TestCase):
             (4, 0), (4, 1), (4, 2), (4, 3), (4, 4),
         })
 
+    def test_dots_to_ascii_art(self):
+        dots = {
+            (0, 0), (0, 1), (0, 2), (0, 3), (0, 4),
+            (1, 0),                         (1, 4),
+            (2, 0),                         (2, 4),
+            (3, 0),                         (3, 4),
+            (4, 0), (4, 1), (4, 2), (4, 3), (4, 4),
+        }
+
+        ascii_art = dots_to_ascii_art(dots)
+
+        self.assertEqual(ascii_art, [
+            "#####",
+            "#...#",
+            "#...#",
+            "#...#",
+            "#####",
+        ])
+
     def test_part_1_sample(self):
         self.assertEqual(part1(self.sample), 17)
 
-    # def test_part_2_sample(self):
-    #     self.assertEqual(part2(self.sample), TODO)
+    def test_part_2_sample(self):
+        self.assertEqual(part2(self.sample), "↑ Read this, puny human! ↑")
 
 
 if __name__ == '__main__':
