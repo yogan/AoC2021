@@ -1,5 +1,5 @@
-from collections import defaultdict, deque
-from math import inf
+from collections import defaultdict
+import heapq
 import unittest
 from input import read_and_solve
 
@@ -12,52 +12,33 @@ def parse_input(lines):
     return graph
 
 
-def find_neighbors(u, Q):
-    # assert u not in Q
-    ui, uj = u
-    return {(i, j) for i, j in Q if
-            (abs(ui - i) == 1 and uj == j) or
-            (abs(uj - j) == 1 and ui == i)}
-
-
 def dijkstra(graph):
-    start = (0, 0)
-    end = max(graph.keys())
+    x_max, y_max = max(graph.keys())
 
-    dist = defaultdict(lambda: inf)
-    prev = dict()
-    Q = set(graph.keys())
+    dx = [0, 1, 0, -1]
+    dy = [1, 0, -1, 0]
 
-    dist[start] = 0
+    costs = defaultdict(lambda: None)
 
-    while Q:
-        distances = {(i, j): dist[(i, j)] for i, j in Q}
-        u = min(distances, key=distances.get)
+    queue = []
+    heapq.heappush(queue, (0, 0, 0))
 
-        Q.remove(u)
+    while queue:
+        cost, x, y = heapq.heappop(queue)
 
-        if u == end:
-            break
+        if costs[(x, y)] is not None:
+            continue
 
-        for v in find_neighbors(u, Q):
-            alt = dist[u] + graph[v]
-            if alt < dist[v]:
-                dist[v] = alt
-                prev[v] = u
+        new_cost = cost + graph[(x, y)]
+        costs[(x, y)] = new_cost
 
-    # S = deque()
-    total_risk = 0
-    u = end
+        for d in range(len(dx)):
+            xx = x + dx[d]
+            yy = y + dy[d]
+            if xx >= 0 and yy >= 0 and xx <= x_max and yy <= y_max:
+                heapq.heappush(queue, (new_cost, xx, yy))
 
-    while True:
-        # S.appendleft(u)
-        if u != start:
-            total_risk += graph[u]
-        if u not in prev:
-            break
-        u = prev[u]
-
-    return total_risk
+    return costs[(x_max, y_max)] - costs[(0, 0)]
 
 
 def part1(lines):
@@ -90,34 +71,6 @@ class TestDay15(unittest.TestCase):
             (0, 0): 1, (0, 1): 2, (0, 2): 3,
             (1, 0): 4, (1, 1): 3, (1, 2): 2,
         })
-
-    def test_find_neighbors(self):
-        Q = {
-                    (0, 1),
-            (1, 0), (1, 1),
-            (2, 0),         (2, 2), (2, 3),
-            (3, 0), (3, 1), (3, 2), (3, 3),
-            (4, 0), (4, 1),
-                    (5, 1),         (5, 3),
-        }
-        self.assertEqual(find_neighbors((0, 0), Q), {
-                    (0, 1),
-            (1, 0),
-        })
-        self.assertEqual(find_neighbors((2, 1), Q), {
-                    (1, 1),
-            (2, 0),         (2, 2),
-                    (3, 1),
-        })
-        self.assertEqual(find_neighbors((4, 2), Q), {
-                    (3, 2),
-            (4, 1),
-        })
-        self.assertEqual(find_neighbors((5, 0), Q), {
-            (4, 0),
-                    (5, 1),
-        })
-        self.assertEqual(find_neighbors((5, 4), Q), {(5, 3)})
 
     def test_part_1_sample(self):
         self.assertEqual(part1(self.sample), 40)
