@@ -1,18 +1,22 @@
 import unittest
+import math
 from input import read_and_solve
 
+# LITERAL VALUE PACKET
+#
 #              7     E     5
-#           0111  1110  0101 pad
-# 110 100  10111 11110 00101 000
-#  |   |
-#   `--+------------------- version 110 = 6
-#      |
-#       `------------------ type id 100 = 4 = literal
+#           0111  1110  0101
+#           |  |  |  |  |  |
+# 110 100  10111 11110 00101  000
+#  |   |               |       `----- padding (0-3 0s)
+#  |   |               `------------- 0 = last seq of 5
+#  |   `----------------------------- version 110 = 6
+#  `--------------------------------- type id 100 = 4 = literal
 
 
 def parse_input(line):
     num = int(line, 16)
-    binary_digits = list(bin(num))[2:]  # [2:] as string looks like '0b0101…'
+    binary_digits = list(bin(num))[2:]  # [2:] as string looks like "0b0101…"
 
     # bin() does not give us leading 0s, so we have to take care of that:
     first_hex_digit = int(line[0], 16)
@@ -39,51 +43,104 @@ def bits_to_decimal(bits):
 
 
 def parse_version_numbers(bits):
-    version_numbers = []
-
     i = 0
     i_max = len(bits) - 1
+    version_numbers = []
 
-    # minimal packet probably 11 bits (3+3 header + 5 literal bits)
-    while i < i_max - 11:
-        version_bits = bits[i:i+3]
-        version_numbers.append(bits_to_decimal(version_bits))
-        i += 3
-
-        type_id_bits = bits[i:i+3]
-        i += 3
-
-        if type_id_bits == list("100"):
-            # Literal packet (ID 4 = 0b100)
-
-            length = 6  # version and type are already parsed
-
-            # Take five bits at a time until leading zero is found:
-            while True:
-                five_bits = bits[i:i+5]
-                i += 5
-                length += 5
-                if five_bits[0] == '0':
-                    break
-
-            # Trailing padding 0s for literal shit
-            # Possible lengths are always 3 + 3 + n * 5: 11, 16, 21, …
-            # Padded length has to be multiple of four.
-            # WTF? might be right, tho…
-            padding_zeroes = (4 - (length % 4)) % 4
-            assert (length + padding_zeroes) % 4 == 0  # I have trust issues
-            i += padding_zeroes
-
-        else:
-            # Operator packet (ID != 4)
-            print("TODO")
+    parse(bits, i, i_max, version_numbers)
 
     return version_numbers
 
 
+def parse_literal(bits, i):
+    length = 6  # for padding to % 4, whole packet (/w header) counts
+
+    # Take five bits at a time until leading zero is found:
+    while True:
+        five_bits = bits[i:i+5]
+        i += 5
+        length += 5
+        if five_bits[0] == "0":
+            break
+
+    # Trailing padding 0s for literal shit
+    # Possible lengths are 5 * n: 5, 10, 15, …
+    # Padded length has to be multiple of four. 5 -> 8 (3), 10 - 12 (2)
+    # WTF is this forumula? Might be right, tho…
+    padding_zeroes = (4 - (length % 4)) % 4
+    assert (length + padding_zeroes) % 4 == 0  # I have trust issues
+    i += padding_zeroes
+
+    # print("length", length)
+    # print("padded zeros:", padding_zeroes)
+    # print("returning from parse_literal with i = ", i - 1)
+
+    return i - 1  # WHYYYYY ლ(ಠ益ಠლ)
+
+
+def parse_operator(bits, i, version_numbers):
+    length_type_id = bits[i]
+    i += 1
+
+    if length_type_id == "0":
+        # Next 15 bits represent the total length of the following
+        # sub-packets (NOT including version/type header or the length
+        # stuff itself!)
+        sub_packet_length = bits_to_decimal(bits[i:i+15])
+        i += 15
+        print("SUB PACKET! /w len:", sub_packet_length)
+        return parse(bits, i, i + sub_packet_length - 1, version_numbers)
+
+    else:
+        # Next 11 bits represent the number (NOT length!) of following
+        # sub-packets
+        num_of_sub_packets = bits_to_decimal(bits[i:i+11])
+        i += 11
+        print("SUB PACKET! # of sub-packets:", num_of_sub_packets)
+        return parse(bits, i, math.inf, version_numbers, num_of_sub_packets)
+
+
+def parse(bits, i, i_max, version_numbers, max_packets=math.inf):
+    print("parse(), i = ", i, "i_max = ", i_max, "versions", version_numbers,
+          "max packets:", max_packets)
+    # if i_max is math.inf:
+    #     print("".join(bits[i:]))
+    # else:
+    #     print("".join(bits[i:i_max+1]))
+
+    assert i_max is math.inf or i_max < len(bits)
+
+    # minimal packet probably 11 bits (3+3 header + 5 literal bits)
+    # while i < i_max - 11:
+    while i <= i_max and max_packets > 0:
+        version_bits = bits[i:i+3]
+        i += 3
+        if i > i_max or i > len(bits) - 5:  # magic offset of the very end
+            break
+
+        type_id_bits = bits[i:i+3]
+        i += 3
+        if i > i_max or i > len(bits) - 5:  # magic offset of the very end
+            break
+
+        version_numbers.append(bits_to_decimal(version_bits))
+        max_packets -= 1
+
+        if type_id_bits == list("100"):
+            # print("literal packet, i (header start) = ", i - 6)
+            i = parse_literal(bits, i)
+        else:
+            print("operator packet, i (header start) = ", i - 6)
+            i = parse_operator(bits, i, version_numbers)
+
+    return i
+
+
 def part1(lines):
     bits = parse_input(lines[0])
-    return sum(parse_version_numbers(bits))
+    print("# of bits:", len(bits))
+    version_numbers = parse_version_numbers(bits)
+    return sum(version_numbers)
 
 
 def part2(lines):
@@ -128,12 +185,24 @@ class TestDay16(unittest.TestCase):
     # second sample packet: operator /w I=0
     sample_operator_1_hex = "38006F45291200"
     sample_operator_1_bin = list(
+        # i =                 22         33             48     55
+        #                      |          |              |      |
         "00111000000000000110111101000101001010010001001000000000")
+    #    VVVTTTILLLLLLLLLLLLLLLAAAAAAAAAAABBBBBBBBBBBBBBBB
+    #                          VVV        VVV
+    #    001                   110        010
+    # version numbers: [0b001, 0b110, 0b010] = [1, 6, 2]
+    sample_operator_1_version_numbers = [1, 6, 2]
 
     # third sample packet: operator /w I=1
     sample_operator_2_hex = "EE00D40C823060"
     sample_operator_2_bin = list(
         "11101110000000001101010000001100100000100011000001100000")
+    #    VVVTTTILLLLLLLLLLLAAAAAAAAAAABBBBBBBBBBBCCCCCCCCCCC
+    #                      VVV        VVV        VVV
+    #    111               010        100        001
+    # version numbers: [0b111, 0b010, 0b100, 0b001] = [7, 2, 4, 1]
+    sample_operator_2_version_numbers = [7, 2, 4, 1]
 
     # just to check that the weird string multiline stuff above actually works
     def test_input(self):
@@ -147,7 +216,8 @@ class TestDay16(unittest.TestCase):
         # hex string into an even longer binary string.
         # First, a length check: each hex digit turns into four binary digits:
         bits_per_hex_digit = 4
-        self.assertEqual(len(bits), self.real_input_length * bits_per_hex_digit)
+        self.assertEqual(len(bits), self.real_input_length *
+                         bits_per_hex_digit)
 
         # Start of input is "C2…", 0xC = 0b1100, 0x2 = 0b0010, so "1100 0010":
         self.assertEqual(self.real_input[:2], "C2")
@@ -209,11 +279,25 @@ class TestDay16(unittest.TestCase):
         versions = parse_version_numbers(self.sample_literal_bin)
         self.assertEqual(versions, [6])
 
-    def test_parse_version_numbers_literal_twice(self):
-        binary = self.sample_literal_bin
-        binary.extend(binary)
-        versions = parse_version_numbers(binary)
-        self.assertEqual(versions, [6, 6])
+    def test_parse_version_numbers_operator_1(self):
+        versions = parse_version_numbers(self.sample_operator_1_bin)
+        self.assertEqual(versions, self.sample_operator_1_version_numbers)
+
+    def test_parse_version_numbers_operator_2(self):
+        versions = parse_version_numbers(self.sample_operator_2_bin)
+        self.assertEqual(versions, self.sample_operator_2_version_numbers)
+
+    def test_part_1_sample_a(self):
+        self.assertEqual(part1(["8A004A801A8002F478"]), 16)
+
+    def test_part_1_sample_b(self):
+        self.assertEqual(part1(["620080001611562C8802118E34"]), 12)
+
+    def test_part_1_sample_c(self):
+        self.assertEqual(part1(["C0015000016115A2E0802F182340"]), 23)
+
+    def test_part_1_sample_d(self):
+        self.assertEqual(part1(["A0016C880162017C3686B18A3D4780"]), 31)
 
     # def test_part_1_sample(self):
     #     self.assertEqual(part1(self.sample), TODO)
