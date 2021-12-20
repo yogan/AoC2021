@@ -46,7 +46,10 @@ def part1(lines):
 
 
 def part2(lines):
-    return 0
+    algo, image = parse_input(lines)
+    for _ in range(50):
+        image = enhance(algo, image)
+    return count_pixels(image)
 
 
 class TestDay20(unittest.TestCase):
@@ -154,8 +157,8 @@ class TestDay20(unittest.TestCase):
     def test_part_1_sample(self):
         self.assertEqual(part1(self.sample), 35)
 
-    # def test_part_2_sample(self):
-    #     self.assertEqual(part2(self.sample), 3351)
+    def test_part_2_sample(self):
+        self.assertEqual(part2(self.sample), 3351)
 
 
 if __name__ == '__main__':
