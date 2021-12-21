@@ -34,7 +34,72 @@ def part1(lines):
 
 
 def part2(lines):
-    return 0
+    positions = list(map(lambda x: x - 1, parse_input(lines)))
+
+    moves = {
+        # steps: # of universes
+        3: 1,
+        4: 3,
+        5: 6,
+        6: 7,
+        7: 6,
+        8: 3,
+        9: 1,
+    }
+
+    players = [
+        [(0, positions[0], 1)],
+        [(0, positions[1], 1)],
+    ]
+
+    counters = [
+        [],  # index = throws, value = # of universes
+        [],
+    ]
+
+    # add more stuff here
+    non_winning_universes = [
+        [],  # index = throws, value = # of universes
+        [],
+    ]
+
+    throws = 0
+
+    while any(map(lambda p: p[0] < 21, [*players[0], *players[1]])):
+        for index in range(len(players)):
+            tuples = []
+            # print(players[index])
+
+            non_winning_universes[index].append(0)
+
+            for score, position, universes in players[index]:
+                if score >= 21:
+                    counters[index].append(universes)
+                    continue
+
+                non_winning_universes[index][throws] += universes
+
+                new_positions = {}  # {new_pos: #_univ}
+
+                for steps, next_universes in moves.items():
+                    new_position = (position + steps) % 10
+                    new_positions[new_position] = universes * next_universes
+
+                new_tuples = [(score + pos + 1, pos, univ)
+                              for pos, univ in new_positions.items()]
+                tuples.extend(new_tuples)
+
+            players[index] = tuples
+
+        throws += 1
+
+    foo1 = [c * n for c, n in zip(counters[0], non_winning_universes[1])]
+    foo2 = [c * n for c, n in zip(counters[1], non_winning_universes[0])]
+
+    sum1 = sum(foo1)
+    sum2 = sum(foo2)
+
+    return max(sum1, sum2)
 
 
 class TestDay21(unittest.TestCase):
@@ -52,8 +117,8 @@ class TestDay21(unittest.TestCase):
     def test_part_1_sample(self):
         self.assertEqual(part1(self.sample), 739785)
 
-    # def test_part_2_sample(self):
-    #     self.assertEqual(part2(self.sample), 3351)
+    def test_part_2_sample(self):
+        self.assertEqual(part2(self.sample), 444356092776315)
 
 
 if __name__ == '__main__':
