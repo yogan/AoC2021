@@ -52,33 +52,14 @@ def part2(lines):
         [(0, positions[1], 1)],
     ]
 
-    counters = [
-        [],  # index = throws, value = # of universes
-        [],
-    ]
+    counters = [0, 0]
 
-    # add more stuff here
-    non_winning_universes = [
-        [],  # index = throws, value = # of universes
-        [],
-    ]
-
-    throws = 0
-
-    while any(map(lambda p: p[0] < 21, [*players[0], *players[1]])):
+    while players[0] and players[1]:
         for index in range(len(players)):
             tuples = []
             # print(players[index])
 
-            non_winning_universes[index].append(0)
-
             for score, position, universes in players[index]:
-                if score >= 21:
-                    counters[index].append(universes)
-                    continue
-
-                non_winning_universes[index][throws] += universes
-
                 new_positions = {}  # {new_pos: #_univ}
 
                 for steps, next_universes in moves.items():
@@ -87,19 +68,22 @@ def part2(lines):
 
                 new_tuples = [(score + pos + 1, pos, univ)
                               for pos, univ in new_positions.items()]
-                tuples.extend(new_tuples)
+
+                winning = [t for t in new_tuples if t[0] >= 21]
+                non_winning = [t for t in new_tuples if t[0] < 21]
+
+                win_universes = sum([t[2] for t in winning])
+                other_player_index = (index + 1) % len(players)
+                other_player_universes = sum(
+                    [t[2] for t in players[other_player_index]])
+                counters[index] += win_universes * other_player_universes
+
+                tuples.extend(non_winning)
 
             players[index] = tuples
 
-        throws += 1
-
-    foo1 = [c * n for c, n in zip(counters[0], non_winning_universes[1])]
-    foo2 = [c * n for c, n in zip(counters[1], non_winning_universes[0])]
-
-    sum1 = sum(foo1)
-    sum2 = sum(foo2)
-
-    return max(sum1, sum2)
+    # print(counters)
+    return max(counters)
 
 
 class TestDay21(unittest.TestCase):
