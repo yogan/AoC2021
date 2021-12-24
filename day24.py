@@ -198,6 +198,25 @@ class TestDay24(unittest.TestCase):
         self.assertEqual((w, x, y, z), (0, 0, 0, -9))
 
 
+def split_input_file():
+    filename = "inputs/24/yogan.txt"
+    num = 0
+    with open(filename) as file:
+        out_handle = None
+        for line in file.readlines():
+            if "inp" in line:
+                if out_handle:
+                    out_handle.close()
+                    out_handle = None
+                num += 1
+                split_file = f"{filename}.{num:02d}"
+                out_handle = open(split_file, "w")
+            out_handle.write(line)
+        out_handle.close()
+        out_handle = None
+
+
 if __name__ == '__main__':
     unittest.main(exit=False)
-    read_and_solve(__file__, part1, part2)
+    split_input_file()
+    # read_and_solve(__file__, part1, part2)
