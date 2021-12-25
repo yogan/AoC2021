@@ -45,7 +45,7 @@ def part1(lines):
 
 
 def part2(lines):
-    return 0
+    return "Part 2 of day 25 is having completed all previous days. ¯\_(ツ)_/¯"
 
 
 class TestDay25(unittest.TestCase):
