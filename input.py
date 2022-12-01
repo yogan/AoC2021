@@ -1,4 +1,7 @@
-def read_and_solve(filename, solve_part_1, solve_part_2):
+import os
+
+def read_and_solve(path, solve_part_1, solve_part_2):
+    filename = os.path.basename(path)
     day = filename.replace("day", "").replace(".py", "")
 
     input_sample   = f"inputs/{day}/sample.txt"
